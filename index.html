@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kalender Peminjaman Ruangan — PRO (Google Calendar style)</title>
+
+<!-- FullCalendar (modern build) -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+<style>
+  :root{
+    --brand:#0b74de;
+    --bg:#f4f6fb;
+    --card:#fff;
+  }
+  body{font-family:Inter, "Segoe UI", Arial; margin:0; background:var(--bg); color:#222}
+  header{background:var(--brand); color:#fff; padding:14px 18px; font-weight:700; font-size:18px}
+  .topbar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:#fff;border-bottom:1px solid #eef2f6}
+  .top-left{flex:1}
+  .controls button{background:var(--brand);color:#fff;border:0;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .container{max-width:1200px;margin:18px auto;padding:0 16px}
+  .row{display:flex;gap:16px}
+  .col-8{flex:2}
+  .col-4{flex:1}
+  .card{background:var(--card);border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(20,30,50,0.06)}
+  #calendar{min-height:650px}
+  /* modal */
+  .modal-backdrop{display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;z-index:40}
+  .modal{background:#fff;border-radius:10px;padding:16px;width:95%;max-width:720px;max-height:80vh;overflow:auto;box-shadow:0 12px 30px rgba(0,0,0,0.25)}
+  .room-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;border-bottom:1px solid #f0f0f0}
+  .badge-used{background:#d9534f;color:#fff;padding:6px 10px;border-radius:6px;font-weight:700}
+  .badge-free{background:#28a745;color:#fff;padding:6px 10px;border-radius:6px;font-weight:700}
+  .small{font-size:13px;color:#555}
+  .event-title{font-weight:700}
+  .muted{color:#666;font-size:13px}
+  @media (max-width:900px){ .row{flex-direction:column} .col-8,.col-4{flex:unset} }
+</style>
+</head>
+<body>
+
+<header>Kalender Peminjaman Ruangan 2025</header>
+
+<div class="topbar">
+  <div class="top-left">
+    <strong>Realtime calendar</strong> — klik tanggal atau event untuk melihat detail & status ruangan.
+  </div>
+  <div class="controls">
+    <button onclick="refreshNow()">Refresh</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-8">
+      <div class="card">
+        <div id="calendar"></div>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <div class="card">
+        <h4>Agenda Singkat Hari Ini</h4>
+        <div id="todaySummary" class="small muted">Memuat...</div>
+        <hr>
+        <h4>Filter Ruangan</h4>
+        <select id="roomFilter" style="width:100%;padding:8px;border-radius:6px;margin-top:8px"></select>
+        <p class="small muted" style="margin-top:8px">Pilih ruangan untuk hanya menampilkan event ruangan tersebut (klik tanggal tetap menampilkan semua)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 id="modalTitle">Detail</h3>
+      <button onclick="closeModal()" style="background:#eee;border:0;padding:6px 10px;border-radius:6px;cursor:pointer">Tutup</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* =======================
+   CONFIG — ganti jika perlu
+   ======================= */
+// GANTI dengan GAS URL kamu (pastikan WebApp dideploy, public)
+const GAS_URL = "https://script.google.com/macros/s/AKfycby9OliXV-a2oF-VZ79fX_rn8UNMSVTteZ2wyrOAZjhT7q8c5CdBI8XW0HKZtKDnplMH/exec";
+
+// endpoints — beberapa GAS return format berbeda; kita handle keduanya
+const ENDPOINT = GAS_URL + "?action=list"; // GAS kamu merespon list
+
+/* =======================
+   STATE
+   ======================= */
+let allRecords = []; // array of items {tanggal: 'yyyy-mm-dd', jam, ruangan, kegiatan, ...}
+let calendar = null;
+let currentFilterRoom = "__all";
+
+/* =======================
+   UTILS
+   ======================= */
+function safeGetArray(resp) {
+  // GAS bisa mengembalikan array langsung atau {status:"", data: [...]}
+  if (!resp) return [];
+  if (Array.isArray(resp)) return resp;
+  if (resp.data && Array.isArray(resp.data)) return resp.data;
+  // if object with numeric keys (rare), try converting
+  return [];
+}
+
+function colorForRoom(name){
+  const palette = ["#007bff","#28a745","#6f42c1","#ff7f50","#17a2b8","#ffc107","#dc3545","#20c997","#6610f2","#fd7e14"];
+  if(!name) return "#999";
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h<<5) - h + name.charCodeAt(i);
+  return palette[Math.abs(h) % palette.length];
+}
+
+/* =======================
+   FETCH & PROCESS DATA
+   ======================= */
+async function fetchData() {
+  try {
+    const r = await fetch(ENDPOINT);
+    const json = await r.json();
+    const arr = safeGetArray(json);
+
+    // Normalize: ensure fields exist and tanggal is yyyy-mm-dd
+    const normalized = arr.map(item => {
+      // keys may differ; try common names (constructed from GAS earlier)
+      const tanggal = item.tanggal || item.Tanggal || item.tgl || item.date || item.day || "";
+      const jam = item.jam || item["Pukul (WIB)"] || item.pukul || item.Pukul || "";
+      const ruangan = item.ruangan || item["Ruangan yang Dipinjam"] || item.room || "";
+      const kegiatan = item.kegiatan || item.Kegiatan || item.activity || "";
+      const peserta = item.peserta || item["Jumlah Peserta"] || "";
+      const pjAcara = item.pjAcara || item["PJ Acara"] || item.pj || "";
+      const pjUmum = item.pjUmum || item["PJ ruangan dari Bagian Umum"] || "";
+      const keterangan = item.ket || item.keterangan || item.Keterangan || "";
+
+      // Ensure date string is yyyy-mm-dd (GAS should already convert; otherwise try common conversions)
+      let dateStr = String(tanggal);
+      if (dateStr.includes("/")) {
+        // dd/mm/yyyy or mm/dd/yyyy — try dd/mm/yyyy
+        const parts = dateStr.split("/");
+        if (parts.length === 3) {
+          const d = parts[0].padStart(2,"0"), m = parts[1].padStart(2,"0"), y = parts[2];
+          dateStr = `${y}-${m}-${d}`;
+        }
+      }
+      // if value is Date object-like (some libs) or Excel number came as number: best-effort
+      // if it already matches yyyy-mm-dd keep it
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr) === false) {
+        // try parse with Date()
+        const d = new Date(dateStr);
+        if (!isNaN(d)) dateStr = d.toISOString().slice(0,10);
+      }
+
+      return {
+        raw: item,
+        tanggal: dateStr,
+        jam: String(jam || "").trim(),
+        ruangan: String(ruangan || "").trim(),
+        kegiatan: String(kegiatan || "").trim(),
+        peserta: peserta,
+        pjAcara: pjAcara,
+        pjUmum: pjUmum,
+        keterangan: keterangan
+      };
+    });
+
+    // Filter out invalid dates
+    const valid = normalized.filter(x => /^20\d{2}-\d{2}-\d{2}$/.test(x.tanggal) && x.ruangan);
+
+    allRecords = valid;
+    return true;
+  } catch (err) {
+    console.error("fetchData error:", err);
+    return false;
+  }
+}
+
+/* =======================
+   RENDER CALENDAR (FullCalendar)
+   ======================= */
+function buildEventsFromRecords(records) {
+  // Apply room filter
+  const recs = (currentFilterRoom === "__all") ? records : records.filter(r => r.ruangan === currentFilterRoom);
+
+  // Map to FullCalendar events (all-day events)
+  return recs.map(r => ({
+    id: `${r.tanggal}|${r.ruangan}|${r.jam}`,
+    title: `${r.ruangan}${r.kegiatan ? " — " + r.kegiatan : ""}`,
+    start: r.tanggal,
+    allDay: true,
+    backgroundColor: colorForRoom(r.ruangan),
+    borderColor: colorForRoom(r.ruangan),
+    extendedProps: r
+  }));
+}
+
+function initOrUpdateCalendar() {
+  const events = buildEventsFromRecords(allRecords);
+
+  if (!calendar) {
+    const calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,listWeek'
+      },
+      events,
+      eventClick: function(info) {
+        showEventDetail(info.event.extendedProps);
+      },
+      dateClick: function(info) {
+        showDayDetail(info.dateStr);
+      },
+      height: 'auto'
+    });
+    calendar.render();
+  } else {
+    calendar.removeAllEvents();
+    calendar.addEventSource(events);
+  }
+}
+
+/* =======================
+   UI: room filter & today summary
+   ======================= */
+function populateRoomFilter() {
+  const sel = document.getElementById("roomFilter");
+  const rooms = Array.from(new Set(allRecords.map(r => r.ruangan))).filter(Boolean).sort();
+  sel.innerHTML = `<option value="__all">Semua Ruangan</option>` + rooms.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join("");
+  sel.onchange = () => { currentFilterRoom = sel.value; initOrUpdateCalendar(); };
+}
+
+function updateTodaySummary() {
+  const today = new Date().toISOString().slice(0,10);
+  const todays = allRecords.filter(r => r.tanggal === today);
+  const box = document.getElementById("todaySummary");
+  if (todays.length === 0) { box.textContent = "Tidak ada agenda hari ini."; return; }
+  box.innerHTML = todays.slice(0,6).map(t => `<div><b>${escapeHtml(t.ruangan)}</b> ${escapeHtml(t.jam)} <div class="small">${escapeHtml(t.kegiatan)}</div></div>`).join("<hr style='border:none;border-top:1px dashed #eee;margin:6px 0'>");
+}
+
+/* =======================
+   DETAILS MODAL
+   ======================= */
+function showEventDetail(props) {
+  const modal = document.getElementById("modalBackdrop");
+  const body = document.getElementById("modalBody");
+  document.getElementById("modalTitle").textContent = `${props.ruangan} — ${props.tanggal}`;
+  body.innerHTML = `
+    <div style="margin-bottom:8px"><span class="event-title">${escapeHtml(props.kegiatan || "-")}</span></div>
+    <div class="muted">Jam: ${escapeHtml(props.jam)}</div>
+    <div class="muted">PJ Acara: ${escapeHtml(props.pjAcara || props.pj)}</div>
+    <div style="margin-top:10px">${escapeHtml(props.keterangan || "")}</div>
+  `;
+  modal.style.display = "flex";
+}
+
+function showDayDetail(dateStr) {
+  const modal = document.getElementById("modalBackdrop");
+  const body = document.getElementById("modalBody");
+  document.getElementById("modalTitle").textContent = `Detail ${dateStr}`;
+
+  // list all rooms from allRecords (not filtered) and show status for dateStr
+  const allRooms = Array.from(new Set(allRecords.map(r => r.ruangan))).filter(Boolean).sort();
+  const eventsOnDate = allRecords.filter(r => r.tanggal === dateStr);
+
+  // build HTML
+  let html = `<div style="margin-bottom:8px"><b>${dateStr}</b></div>`;
+  if (allRooms.length === 0) {
+    html += `<div class="small muted">Belum ada daftar ruangan di data.</div>`;
+  } else {
+    allRooms.forEach(room => {
+      const used = eventsOnDate.filter(e => e.ruangan === room);
+      html += `<div class="room-row"><div><div style="font-weight:700">${escapeHtml(room)}</div><div class="small">${used.length ? used.length + " kegiatan" : "Kosong"}</div></div>`;
+      if (!used.length) {
+        html += `<div><span class="badge-free">KOSONG</span></div></div>`;
+      } else {
+        // show jam & kegiatan list
+        const details = used.map(u => `<div style="margin-bottom:6px"><b>${escapeHtml(u.jam)}</b> — ${escapeHtml(u.kegiatan||'-')} <div class="small">PJ: ${escapeHtml(u.pjAcara||u.pj||'-')}</div></div>`).join("");
+        html += `<div><span class="badge-used">DIPAKAI</span><div style="margin-top:8px">${details}</div></div></div>`;
+      }
+    });
+  }
+
+  body.innerHTML = html;
+  modal.style.display = "flex";
+}
+
+function closeModal() { document.getElementById("modalBackdrop").style.display = "none"; }
+
+/* =======================
+   UTIL Helpers
+   ======================= */
+function escapeHtml(s){ return String(s||"").replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }
+
+async function refreshNow(){
+  const ok = await fetchData();
+  if(ok) {
+    populateRoomFilter();
+    initOrUpdateCalendar();
+    updateTodaySummary();
+  } else {
+    alert("Gagal memuat data dari server. Cek console.");
+  }
+}
+
+/* =======================
+   START: initial load + auto refresh
+   ======================= */
+(async function(){
+  await refreshNow();
+  setInterval(refreshNow, 30000); // refresh every 30s
+})();
+</script>
+
+</body>
+</html>
