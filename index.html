@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peminjaman Ruangan 2025</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">📊 SE 2026</div>
+
+    <nav>
+      <button class="nav-btn" onclick="scrollToTable()">📋 Data</button>
+      <button class="nav-btn" onclick="location.href='calender.html'">
+  📅 Kalender
+</button>
+
+
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <h1>📅 Peminjaman Ruangan</h1>
+
+    <!-- FORM -->
+    <div class="card" id="formSection">
+      <h2>➕ Tambah Peminjaman</h2>
+
+      <form id="dataForm">
+        <div class="form-grid">
+
+          <input name="Tanggal" placeholder="Tanggal (contoh: 13)" required>
+
+          <select name="Bulan" required>
+            <option value="" disabled selected>Pilih Bulan</option>
+            <option>Januari</option><option>Februari</option>
+            <option>Maret</option><option>April</option>
+            <option>Mei</option><option>Juni</option>
+            <option>Juli</option><option>Agustus</option>
+            <option>September</option><option>Oktober</option>
+            <option>November</option><option>Desember</option>
+          </select>
+
+          <input name="Pukul (WIB)" placeholder="08.00 - 10.00" required>
+
+          <select name="Ruangan yang Dipinjam" required>
+            <option value="" disabled selected>Pilih Ruangan</option>
+            <option>Marapi</option>
+            <option>Kerinci</option>
+            <option>Singgalang</option>
+            <option>Tandikek</option>
+            <option>Ruang Garda SE2026</option>
+            <option>Ruang Pengolahan</option>
+          </select>
+
+          <input name="Kegiatan" placeholder="Kegiatan" required>
+          <input name="Jumlah Peserta" placeholder="Jumlah Peserta" required>
+          <input name="PJ Acara" placeholder="PJ Acara" required>
+          <input name="PJ ruangan dari Bagian Umum" placeholder="PJ Bagian Umum">
+          <input name="Keterangan" placeholder="Keterangan">
+          <input name="WARNING" placeholder="WARNING">
+
+        </div>
+
+        <div style="margin-top:12px">
+          <button type="submit" id="btnSubmit">Simpan Data</button>
+          <div id="formStatus"></div>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLE -->
+    <div id="tableView" class="card">
+      <h2>📋 Data Peminjaman</h2>
+      <div class="table-wrap">
+        <table id="data-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+
+<script>
+function scrollToForm(){
+  document.getElementById("formSection")
+    .scrollIntoView({ behavior:"smooth" });
+}
+
+function scrollToTable(){
+  document.getElementById("tableView")
+    .scrollIntoView({ behavior:"smooth" });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,228 @@
+/* ==============================
+   TEMA SENSUS EKONOMI 2026
+============================== */
+:root{
+  --se-orange:#f97316;
+  --se-orange-dark:#ea580c;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#1f2937;
+  --muted:#6b7280;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:"Segoe UI", Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 500px at top, #fff7ed 0%, #f8fafc 60%);
+}
+
+/* APP SHELL */
+.app-shell{
+  max-width:1280px;
+  margin:24px auto;
+  padding:20px;
+}
+
+/* CONTAINER */
+.container{
+  max-width:1280px;
+  margin:auto;
+  padding:20px;
+}
+
+/* HEADER */
+h1{
+  font-size:26px;
+  color:var(--se-orange-dark);
+  margin-bottom:12px;
+}
+
+h2{
+  font-size:18px;
+  color:var(--se-orange-dark);
+  border-left:4px solid var(--se-orange);
+  padding-left:10px;
+  margin-bottom:12px;
+}
+
+/* CARD */
+.card{
+  background:linear-gradient(180deg,#ffffff,#fffaf5);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* FORM */
+.form-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap:14px;
+}
+
+form input,
+form select{
+  width:100%;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  font-size:14px;
+  background:#fff;
+}
+
+form input::placeholder{
+  color:var(--muted);
+}
+
+form input:focus,
+form select:focus{
+  outline:none;
+  border-color:var(--se-orange);
+  box-shadow:0 0 0 2px rgba(249,115,22,.2);
+}
+
+/* BUTTON */
+button{
+  background:var(--se-orange);
+  color:#fff;
+  border:none;
+  padding:12px 18px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+button:hover{
+  background:var(--se-orange-dark);
+}
+
+button:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
+
+/* TABLE */
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1000px;
+}
+
+th, td{
+  border:1px solid var(--border);
+  padding:10px;
+  font-size:13px;
+  text-align:left;
+}
+
+th{
+  background:#fff7ed;
+  color:#7c2d12;
+  font-weight:600;
+  position:sticky;
+  top:0;
+  z-index:2;
+}
+
+tr:nth-child(even){
+  background:#fafafa;
+}
+
+tr:hover{
+  background:#fff7ed;
+}
+
+/* TOGGLE TABEL / KALENDER */
+.data-toggle{
+  display:flex;
+  gap:6px;
+  margin-bottom:12px;
+}
+
+.data-toggle button{
+  background:#fff;
+  color:#9a3412;
+  border:1px solid #fdba74;
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.data-toggle button.active{
+  background:#f97316;
+  color:#fff;
+  border-color:#f97316;
+}
+
+/* KALENDER SEDERHANA (NON FullCalendar) */
+.calendar-item{
+  border:1px solid #fed7aa;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:8px;
+  background:#fff7ed;
+}
+
+/* BACK BUTTON */
+.back-btn{
+  background:#fff;
+  border:1px solid #fdba74;
+  color:#9a3412;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:12px;
+}
+
+.back-btn:hover{
+  background:#fff7ed;
+}
+
+/* MODAL */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.modal-content{
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  max-width:400px;
+  width:90%;
+  box-shadow:0 20px 40px rgba(0,0,0,.2);
+  animation:fadeUp .25s ease;
+}
+
+@keyframes fadeUp{
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:none; }
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  h1{font-size:22px}
+  h2{font-size:16px}
+}

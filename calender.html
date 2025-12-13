@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kalender Peminjaman Ruangan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+
+<style>
+:root{
+  --se-orange:#f97316;
+  --se-orange-dark:#ea580c;
+  --se-red:#dc2626;
+  --bg:#f8fafc;
+  --card:#ffffff;
+}
+
+body{
+  margin:0;
+  font-family:"Segoe UI", Arial, sans-serif;
+  background:radial-gradient(1200px 500px at top, #fff7ed 0%, #f8fafc 60%);
+}
+
+/* APP SHELL */
+.app-shell{
+  max-width:1300px;
+  margin:30px auto;
+  padding:20px;
+}
+
+/* HEADER */
+.page-header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:rgba(255,255,255,.85);
+  backdrop-filter: blur(8px);
+  padding:14px 18px;
+  border-radius:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,.06);
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.page-header h1{
+  margin:0;
+  font-size:22px;
+  color:var(--se-orange-dark);
+}
+
+.back-btn{
+  background:#fff;
+  border:1px solid #fed7aa;
+  color:#9a3412;
+  padding:8px 14px;
+  border-radius:999px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.back-btn:hover{
+  background:#fff7ed;
+  transform:translateX(-2px);
+}
+
+/* CARD */
+.card{
+  background:linear-gradient(180deg,#ffffff,#fffaf5);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+/* FULLCALENDAR */
+.fc{
+  background:#ffffff;
+  border-radius:12px;
+  padding:10px;
+}
+
+.fc .fc-toolbar-title{
+  color:var(--se-orange-dark);
+}
+
+.fc .fc-button{
+  background:var(--se-orange);
+  border:none;
+}
+
+.fc .fc-button:hover{
+  background:var(--se-orange-dark);
+}
+
+.fc-event{
+  border:none;
+  border-radius:6px;
+  font-size:12px;
+  padding:3px 5px;
+}
+
+.fc-daygrid-day{
+  transition:.15s;
+}
+
+.fc-daygrid-day:hover{
+  background:#fff7ed;
+}
+
+.fc-day-today{
+  background:#ffedd5 !important;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+
+.modal-content{
+  background:#ffffff;
+  border-radius:14px;
+  padding:18px 20px;
+  max-width:420px;
+  width:90%;
+  box-shadow:0 20px 40px rgba(0,0,0,.2);
+  animation:fadeUp .25s ease;
+}
+
+@keyframes fadeUp{
+  from{ opacity:0; transform:translateY(10px); }
+  to{ opacity:1; transform:none; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app-shell">
+  <div class="page-header">
+    <button id="btnBack" class="back-btn">← Kembali</button>
+    <h1 id="pageTitle">📅 Kalender Peminjaman Ruangan</h1>
+  </div>
+
+  <div class="card">
+    <div id="calendar"></div>
+  </div>
+</div>
+
+<div id="eventModal" class="modal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3 id="mTitle"></h3>
+    <p id="mDetail"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzkKOICVVi7Z88Ru2-LuaIhUEFUV7c3IMDf0yMbnYKK4iQzIU6OgwUd39iN0Rwn2q0VKQ/exec";
+
+function getYear(){
+  const params = new URLSearchParams(window.location.search);
+  return Number(params.get("year")) || new Date().getFullYear();
+}
+
+const YEAR = getYear();
+document.getElementById("pageTitle").innerText =
+  "📅 Kalender Peminjaman Ruangan – " + YEAR;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const calendarEl = document.getElementById('calendar');
+
+  document.getElementById("btnBack").onclick = () => {
+    window.location.href = "index.html";
+  };
+
+  const res = await fetch(GAS_URL);
+  const data = await res.json();
+
+  const monthMap = {
+    Januari:0, Februari:1, Maret:2, April:3, Mei:4, Juni:5,
+    Juli:6, Agustus:7, September:8, Oktober:9, November:10, Desember:11
+  };
+
+  const roomColors = {
+    "Marapi": { bg:"#f97316", border:"#ea580c" },
+    "Kerinci": { bg:"#0ea5e9", border:"#0284c7" },
+    "Singgalang": { bg:"#22c55e", border:"#16a34a" },
+    "Tandikek": { bg:"#8b5cf6", border:"#7c3aed" },
+    "Ruang Garda SE2026": { bg:"#ec4899", border:"#db2777" },
+    "Ruang Pengolahan": { bg:"#14b8a6", border:"#0d9488" }
+  };
+
+  const events = data.map(row => {
+    let startDay = row["Tanggal"];
+    let endDay = row["Tanggal"];
+
+    if(String(startDay).includes("-")){
+      [startDay,endDay] = startDay.split("-");
+    }
+
+    const color = roomColors[row["Ruangan yang Dipinjam"]] || { bg:"#94a3b8", border:"#64748b" };
+
+    return {
+      title: row["Ruangan yang Dipinjam"] + " | " + row["Pukul (WIB)"],
+      start: new Date(YEAR, monthMap[row["Bulan"]], startDay),
+      end: new Date(YEAR, monthMap[row["Bulan"]], Number(endDay) + 1),
+      allDay:true,
+      backgroundColor: row["WARNING"] ? "#dc2626" : color.bg,
+      borderColor: row["WARNING"] ? "#b91c1c" : color.border,
+      extendedProps:{
+        kegiatan: row["Kegiatan"],
+        pj: row["PJ Acara"],
+        peserta: row["Jumlah Peserta"]
+      }
+    };
+  });
+
+  const calendar = new FullCalendar.Calendar(calendarEl,{
+    initialView:'dayGridMonth',
+    locale:'id',
+    height:'auto',
+    events,
+    eventClick(info){
+      document.getElementById("mTitle").innerText = info.event.title;
+      document.getElementById("mDetail").innerHTML = `
+        📋 Kegiatan: ${info.event.extendedProps.kegiatan}<br>
+        👤 PJ: ${info.event.extendedProps.pj}<br>
+        👥 Peserta: ${info.event.extendedProps.peserta}
+      `;
+      document.getElementById("eventModal").style.display = "flex";
+    }
+  });
+
+  calendar.render();
+});
+
+function closeModal(){
+  document.getElementById("eventModal").style.display = "none";
+}
+</script>
+
+</body>
+</html>
