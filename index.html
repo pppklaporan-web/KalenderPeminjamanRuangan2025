@@ -11,24 +11,31 @@
 
 <div class="app-layout">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="brand">📊 SE 2026</div>
+  <!-- TOP NAVBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <img src="logo1.png" alt="Logo 1" class="logo">
+  </div>
 
-    <nav>
-      <button class="nav-btn" onclick="scrollToTable()">📋 Data</button>
-      <button class="nav-btn" onclick="location.href='calender.html'">
-  📅 Kalender
-</button>
+  <div class="app-title">Aplikasi Peminjaman Ruangan</div>
 
+  <div class="topbar-right">
+    <img src="logo2.png" alt="Logo 2" class="logo">
+  </div>
+</header>
 
-    </nav>
-  </aside>
+<!-- NAVBAR BAWAH HEADER -->
+<nav class="topbar-nav">
+  <button class="nav-btn active" onclick="scrollToTable()">📋 Data Peminjaman</button>
+  <button class="nav-btn" onclick="location.href='calender.html'">📅 Kalender</button>
+</nav>
 
   <!-- MAIN CONTENT -->
   <main class="main-content">
 
-    <h1>📅 Peminjaman Ruangan</h1>
+
+    <h1 class="visually-hidden">Aplikasi Peminjaman Ruangan</h1>
+
 
     <!-- FORM -->
     <div class="card" id="formSection">
@@ -41,12 +48,18 @@
 
           <select name="Bulan" required>
             <option value="" disabled selected>Pilih Bulan</option>
-            <option>Januari</option><option>Februari</option>
-            <option>Maret</option><option>April</option>
-            <option>Mei</option><option>Juni</option>
-            <option>Juli</option><option>Agustus</option>
-            <option>September</option><option>Oktober</option>
-            <option>November</option><option>Desember</option>
+            <option>Januari</option>
+            <option>Februari</option>
+            <option>Maret</option>
+            <option>April</option>
+            <option>Mei</option>
+            <option>Juni</option>
+            <option>Juli</option>
+            <option>Agustus</option>
+            <option>September</option>
+            <option>Oktober</option>
+            <option>November</option>
+            <option>Desember</option>
           </select>
 
           <input name="Pukul (WIB)" placeholder="08.00 - 10.00" required>
@@ -70,11 +83,31 @@
 
         </div>
 
-        <div style="margin-top:12px">
-          <button type="submit" id="btnSubmit">Simpan Data</button>
-          <div id="formStatus"></div>
+        <div style="margin-top:14px">
+          <button type="submit" id="btnSubmit">💾 Simpan Data</button>
+          <div id="formStatus" style="margin-top:6px;font-weight:600;"></div>
         </div>
       </form>
+    </div>
+
+    <!-- FILTER BULAN -->
+    <div class="card">
+      <label><strong>📆 Filter Bulan</strong></label><br>
+      <select id="filterBulan">
+        <option value="current">Bulan Ini</option>
+        <option>Januari</option>
+        <option>Februari</option>
+        <option>Maret</option>
+        <option>April</option>
+        <option>Mei</option>
+        <option>Juni</option>
+        <option>Juli</option>
+        <option>Agustus</option>
+        <option>September</option>
+        <option>Oktober</option>
+        <option>November</option>
+        <option>Desember</option>
+      </select>
     </div>
 
     <!-- TABLE -->
@@ -91,8 +124,10 @@
   </main>
 </div>
 
-<script src="app.js"></script>
+<!-- APP JS -->
+<script src="script.js"></script>
 
+<!-- SCROLL -->
 <script>
 function scrollToForm(){
   document.getElementById("formSection")
@@ -104,6 +139,12 @@ function scrollToTable(){
     .scrollIntoView({ behavior:"smooth" });
 }
 </script>
+
+<footer class="app-footer">
+  © 2026 BPS Provinsi Sumatera Barat — Aplikasi Peminjaman Ruangan
+</footer>
+
+
 
 </body>
 </html>
