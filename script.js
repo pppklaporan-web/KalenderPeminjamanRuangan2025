@@ -56,81 +56,106 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ================= RENDER TABLE ================= */
-  function renderTable(data){
-    const thead = document.querySelector("#data-table thead");
-    const tbody = document.querySelector("#data-table tbody");
+function renderTable(data){
+  const thead = document.querySelector("#data-table thead");
+  const tbody = document.querySelector("#data-table tbody");
 
-    if(!data.length){
-      thead.innerHTML = "";
-      tbody.innerHTML = "<tr><td colspan='99'>Tidak ada data</td></tr>";
-      return;
-    }
-
-    const headers = Object.keys(data[0]).filter(h => h !== "ID");
-
-    thead.innerHTML =
-      "<tr><th>No</th>" +
-      headers.filter(h => h !== "WARNING").map(h=>`<th>${h}</th>`).join("") +
-      "<th>WARNING</th><th>Aksi</th></tr>";
-
-    tbody.innerHTML = [...data].reverse().map((row,i)=>{
-      const bentrokData = cariBentrok(row, cachedData);
-      const bentrok = !!bentrokData;
-
-      const headersTanpaWarning = headers.filter(h => h !== "WARNING");
-
-      return `
-        <tr class="${bentrok ? "bentrok" : ""}">
-          <td>${i+1}</td>
-          ${headersTanpaWarning.map(h=>`<td>${row[h] || ""}</td>`).join("")}
-          <td class="warning-cell">
-            ${bentrok ? `⚠️ Bentrok jam dengan ${bentrokData["Pukul (WIB)"]}` : ""}
-          </td>
-          <td>
-            <button onclick="hapusData('${row.ID}')">🗑️</button>
-          </td>
-        </tr>
-      `;
-    }).join("");
+  if(!data.length){
+    thead.innerHTML = "";
+    tbody.innerHTML = "<tr><td colspan='99'>Tidak ada data</td></tr>";
+    return;
   }
 
-  /* ================= SUBMIT FORM ================= */
-  form.addEventListener("submit", async e=>{
-    e.preventDefault();
-    if(btn.disabled) return;
+  const headers = Object.keys(data[0]).filter(h => h !== "ID");
 
-    const formData = Object.fromEntries(new FormData(form).entries());
+  thead.innerHTML =
+    "<tr><th>No</th>" +
+    headers.filter(h => h !== "WARNING").map(h=>`<th>${h}</th>`).join("") +
+    "<th>WARNING</th><th>Aksi</th></tr>";
 
-    btn.disabled = true;
-    btn.innerText = "⏳ Mengirim...";
-    statusText.innerHTML = "Sedang mengirim data...";
+  tbody.innerHTML = [...data].reverse().map((row,i)=>{
+    const bentrokData = cariBentrok(row, cachedData);
+    const bentrok = !!bentrokData;
+    const headersTanpaWarning = headers.filter(h => h !== "WARNING");
 
-    try{
-      const res = await fetch(URL,{
-        method:"POST",
-        body: JSON.stringify({ action: "add", ...formData })
-      });
+    return `
+      <tr class="${bentrok ? "bentrok" : ""}">
+        <td>${i+1}</td>
+        ${headersTanpaWarning.map(h=>`<td>${row[h] || ""}</td>`).join("")}
+        <td class="warning-cell">
+          ${bentrok ? `⚠️ Bentrok jam dengan ${bentrokData["Pukul (WIB)"]}` : ""}
+        </td>
+        <td>
+          <button onclick="editData('${row.ID}')">✏️</button>
+          <button onclick="hapusData('${row.ID}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
 
-      const result = await res.json();
+/* ================= EDIT DATA ================= */
+let editingID = null; // menyimpan ID data yang sedang diedit
 
-      if(result.status === "success"){
-        statusText.innerHTML = "✅ Data berhasil disimpan";
-        statusText.style.color = "green";
-        form.reset();
-        loadTable();
-      }else{
-        statusText.innerHTML = "⚠️ " + result.message;
-        statusText.style.color = "red";
-      }
-    }catch(err){
-      statusText.innerHTML = "❌ Gagal mengirim data";
+window.editData = function(id){
+  const row = cachedData.find(d => d.ID === id);
+  if(!row) return alert("Data tidak ditemukan");
+
+  // Pindahkan data ke form
+  for(const key in row){
+    const input = form.querySelector(`[name="${key}"]`);
+    if(input) input.value = row[key];
+  }
+
+  editingID = id; // tandai ini sebagai data edit
+  btn.innerText = "💾 Update Data";
+  statusText.innerHTML = "✏️ Mengedit data...";
+  statusText.style.color = "blue";
+}
+
+/* ================= SUBMIT FORM ================= */
+form.addEventListener("submit", async e=>{
+  e.preventDefault();
+  if(btn.disabled) return;
+
+  const formData = Object.fromEntries(new FormData(form).entries());
+
+  btn.disabled = true;
+  btn.innerText = editingID ? "⏳ Mengupdate..." : "⏳ Mengirim...";
+  statusText.innerHTML = editingID ? "Sedang mengupdate data..." : "Sedang mengirim data...";
+
+  try{
+    const res = await fetch(URL,{
+      method:"POST",
+      body: JSON.stringify({
+        action: editingID ? "edit" : "add",
+        id: editingID,
+        ...formData
+      })
+    });
+
+    const result = await res.json();
+
+    if(result.status === "success"){
+      statusText.innerHTML = editingID ? "✅ Data berhasil diperbarui" : "✅ Data berhasil disimpan";
+      statusText.style.color = "green";
+      form.reset();
+      editingID = null;
+      btn.innerText = "Simpan Data";
+      loadTable();
+    }else{
+      statusText.innerHTML = "⚠️ " + result.message;
       statusText.style.color = "red";
-      console.error(err);
     }
+  }catch(err){
+    statusText.innerHTML = "❌ Gagal mengirim data";
+    statusText.style.color = "red";
+    console.error(err);
+  }
 
-    btn.disabled = false;
-    btn.innerText = "Simpan Data";
-  });
+  btn.disabled = false;
+  if(!editingID) btn.innerText = "Simpan Data";
+});
 
   /* ================= REKOMENDASI RUANGAN ================= */
   function cekRekomendasiRuangan(tanggal, bulan, ruanganDipilih){
