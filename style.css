@@ -68,6 +68,9 @@ body{
   padding:10px 16px;
   background:#0b74de;
   color:#fff;
+  position: sticky; /* agar topbar tetap */
+  top:0;
+  z-index: 1000;
 }
 
 .topbar-left,
@@ -85,6 +88,9 @@ body{
   text-align:center;
   font-size:1.4rem;
   font-weight:700;
+  white-space: nowrap; /* agar tidak pecah */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==============================
@@ -180,12 +186,15 @@ button:disabled{opacity:.7;cursor:not-allowed}
 .table-wrap{
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
+  position: relative; /* penting untuk sticky th */
 }
 
 table{
   width:100%;
   border-collapse:collapse;
+  table-layout: fixed; /* kolom tetap */
   min-width:1000px;
+  word-break: break-word; /* agar teks tidak keluar */
 }
 
 th,td{
@@ -193,21 +202,26 @@ th,td{
   padding:10px;
   font-size:13px;
   text-align:center;
-  white-space:nowrap;
+  white-space: normal; /* agar teks bisa wrap */
 }
 
 th{
   background:#eff6ff;
   color:var(--primary-dark);
   font-weight:700;
-  position:sticky;
-  top:0;
+  position: sticky;
+  top:0; /* tetap saat scroll vertikal */
+  z-index: 2;
 }
+
+thead th{
+  z-index: 3;
+}
+
+th.id,td.id{display:none}
 
 tr:nth-child(even){background:#fafafa}
 tr:hover{background:#eef2ff}
-
-th.id,td.id{display:none}
 
 .warning-cell{
   color:#b91c1c;
