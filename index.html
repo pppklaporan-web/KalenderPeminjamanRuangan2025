@@ -1,150 +1,30 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Peminjaman Ruangan 2025</title>
-<link rel="stylesheet" href="style.css">
+  <title>Booking Ruangan - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="app-layout">
-
-  <!-- TOP NAVBAR -->
-<header class="topbar">
-  <div class="topbar-left">
-    <img src="logo1.png" alt="Logo 1" class="logo">
-  </div>
-
-  <div class="app-title">Aplikasi Peminjaman Ruangan</div>
-
-  <div class="topbar-right">
-    <img src="logo2.png" alt="Logo 2" class="logo">
-  </div>
-</header>
-
-<!-- NAVBAR BAWAH HEADER -->
-<nav class="topbar-nav">
-  <button class="nav-btn active" onclick="scrollToTable()">📋 Data Peminjaman</button>
-  <button class="nav-btn" onclick="location.href='calender.html'">📅 Kalender</button>
-</nav>
-
-  <!-- MAIN CONTENT -->
-  <main class="main-content">
-
-
-    <h1 class="visually-hidden">Aplikasi Peminjaman Ruangan</h1>
-
-
-    <!-- FORM -->
-    <div class="card" id="formSection">
-      <h2>➕ Tambah Peminjaman</h2>
-
-      <form id="dataForm">
-        <div class="form-grid">
-
-          <input name="Tanggal" placeholder="Tanggal (contoh: 13)" required>
-
-          <select name="Bulan" required>
-            <option value="" disabled selected>Pilih Bulan</option>
-            <option>Januari</option>
-            <option>Februari</option>
-            <option>Maret</option>
-            <option>April</option>
-            <option>Mei</option>
-            <option>Juni</option>
-            <option>Juli</option>
-            <option>Agustus</option>
-            <option>September</option>
-            <option>Oktober</option>
-            <option>November</option>
-            <option>Desember</option>
-          </select>
-
-          <input name="Pukul (WIB)" placeholder="08.00 - 10.00" required>
-
-          <select name="Ruangan yang Dipinjam" required>
-            <option value="" disabled selected>Pilih Ruangan</option>
-            <option>Marapi</option>
-            <option>Kerinci</option>
-            <option>Singgalang</option>
-            <option>Tandikek</option>
-            <option>Ruang Garda SE2026</option>
-            <option>Ruang Pengolahan</option>
-          </select>
-
-          <input name="Kegiatan" placeholder="Kegiatan" required>
-          <input name="Jumlah Peserta" placeholder="Jumlah Peserta" required>
-          <input name="PJ Acara" placeholder="PJ Acara" required>
-          <input name="PJ ruangan dari Bagian Umum" placeholder="PJ Bagian Umum">
-          <input name="Keterangan" placeholder="Keterangan">
-          <input name="WARNING" placeholder="WARNING">
-
-        </div>
-
-        <div style="margin-top:14px">
-          <button type="submit" id="btnSubmit">💾 Simpan Data</button>
-          <div id="formStatus" style="margin-top:6px;font-weight:600;"></div>
-        </div>
-      </form>
-    </div>
-
-    <!-- FILTER BULAN -->
-    <div class="card">
-      <label><strong>📆 Filter Bulan</strong></label><br>
-      <select id="filterBulan">
-        <option value="current">Bulan Ini</option>
-        <option>Januari</option>
-        <option>Februari</option>
-        <option>Maret</option>
-        <option>April</option>
-        <option>Mei</option>
-        <option>Juni</option>
-        <option>Juli</option>
-        <option>Agustus</option>
-        <option>September</option>
-        <option>Oktober</option>
-        <option>November</option>
-        <option>Desember</option>
-      </select>
-    </div>
-
-    <!-- TABLE -->
-    <div id="tableView" class="card">
-      <h2>📋 Data Peminjaman</h2>
-      <div class="table-wrap">
-        <table id="data-table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-  </main>
+<div class="sidebar">
+  <img src="logo1.png" class="logo">
+  <a href="index.html">Dashboard</a>
+  <a href="calendar.html">Kalender</a>
+  <a href="jadwal.html">Jadwal</a>
 </div>
 
-<!-- APP JS -->
-<script src="script.js"></script>
+<div class="main">
+  <h1>Dashboard Booking Ruangan</h1>
 
-<!-- SCROLL -->
-<script>
-function scrollToForm(){
-  document.getElementById("formSection")
-    .scrollIntoView({ behavior:"smooth" });
-}
+  <div class="card-container">
+    <div class="card">Total Booking</div>
+    <div class="card">Bentrok</div>
+    <div class="card">Tersedia</div>
+  </div>
 
-function scrollToTable(){
-  document.getElementById("tableView")
-    .scrollIntoView({ behavior:"smooth" });
-}
-</script>
+  <div id="tableArea"></div>
+</div>
 
-<footer class="app-footer">
-  © 2026 BPS Provinsi Sumatera Barat — Aplikasi Peminjaman Ruangan
-</footer>
-
-
-
+<script src="scripts.js"></script>
 </body>
 </html>
