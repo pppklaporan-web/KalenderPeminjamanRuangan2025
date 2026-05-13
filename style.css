@@ -1,275 +1,71 @@
-/* ==============================
-   TEMA & VARIABEL
-============================== */
-:root{
-  --primary:#2563eb;
-  --primary-dark:#1e40af;
-  --accent:#f97316;
-  --bg:#f8fafc;
-  --card:#ffffff;
-  --border:#e5e7eb;
-  --text:#1f2937;
-  --muted:#6b7280;
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #f4f6f9;
 }
 
-/* ==============================
-   RESET & DASAR
-============================== */
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:"Segoe UI", Arial, sans-serif;
-  color:var(--text);
-  background:radial-gradient(1200px 500px at top, #eff6ff 0%, #f8fafc 60%);
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #1f2d3d;
+  position: fixed;
+  padding: 20px;
 }
 
-.visually-hidden{
-  position:absolute;
-  width:1px;height:1px;
-  margin:-1px;padding:0;
-  overflow:hidden;
-  clip:rect(0,0,0,0);
-  white-space:nowrap;border:0;
+.sidebar a {
+  display: block;
+  color: white;
+  padding: 10px;
+  text-decoration: none;
 }
 
-/* ==============================
-   LAYOUT UTAMA
-============================== */
-.app-layout{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
+.sidebar a:hover {
+  background: #2e86de;
 }
 
-.main-content{
-  flex:1;
-  max-width:1400px;   /* default tablet/laptop */
-  margin:auto;
-  padding:16px;
+/* LOGO */
+.logo {
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-.card{
-  background:var(--card);
-  padding:20px;
-  margin-bottom:20px;
-  border-radius:12px;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
+/* MAIN */
+.main {
+  margin-left: 240px;
+  padding: 20px;
 }
 
-/* ==============================
-   TOPBAR
-============================== */
-.topbar{
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:10px;
-  padding:10px 16px;
-  background:#0b74de;
-  color:#fff;
-  position: sticky; /* agar topbar tetap */
-  top:0;
-  z-index: 1000;
+/* CARD */
+.card-container {
+  display: flex;
+  gap: 10px;
 }
 
-.topbar-left,
-.topbar-right{
-  display:flex;
-  align-items:center;
+.card {
+  background: white;
+  padding: 20px;
+  flex: 1;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.logo{
-  height:48px;
-  width:auto;
+/* FORM */
+input {
+  display: block;
+  padding: 10px;
+  margin: 10px 0;
+  width: 300px;
 }
 
-.app-title{
-  text-align:center;
-  font-size:1.4rem;
-  font-weight:700;
-  white-space: nowrap; /* agar tidak pecah */
-  overflow: hidden;
-  text-overflow: ellipsis;
+button {
+  padding: 10px 20px;
+  background: #2e86de;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
-/* ==============================
-   NAVBAR BAWAH
-============================== */
-.topbar-nav{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:10px;
-  padding:10px;
-  background:#f8f9fa;
-}
-
-.nav-btn{
-  padding:10px 14px;
-  border:none;
-  border-radius:10px;
-  font-size:15px;
-  font-weight:600;
-  cursor:pointer;
-  background:var(--accent);
-  color:#fff;
-  transition:.2s;
-}
-
-.nav-btn:hover,
-.nav-btn.active{
-  background:#0b74de;
-}
-
-/* ==============================
-   JUDUL
-============================== */
-h1{
-  font-size:26px;
-  font-weight:800;
-  color:var(--primary-dark);
-}
-
-h2{
-  font-size:18px;
-  color:var(--primary-dark);
-  border-left:4px solid var(--primary);
-  padding-left:10px;
-  margin-bottom:14px;
-}
-
-/* ==============================
-   FORM
-============================== */
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:14px;
-}
-
-form input,
-form select{
-  width:100%;
-  padding:10px 12px;
-  border-radius:8px;
-  border:1px solid var(--border);
-  font-size:14px;
-}
-
-form input::placeholder{color:var(--muted)}
-
-form input:focus,
-form select:focus{
-  outline:none;
-  border-color:var(--primary);
-  box-shadow:0 0 0 2px rgba(37,99,235,.25);
-}
-
-button{
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  padding:12px 18px;
-  border-radius:8px;
-  font-size:14px;
-  font-weight:600;
-  cursor:pointer;
-  transition:.2s;
-}
-
-button:hover{background:var(--primary-dark)}
-button:disabled{opacity:.7;cursor:not-allowed}
-
-/* ==============================
-   TABLE
-============================== */
-.table-wrap{
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  position: relative; /* penting untuk sticky th */
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  table-layout: fixed; /* kolom tetap */
-  min-width:1000px;
-  word-break: break-word; /* agar teks tidak keluar */
-}
-
-th,td{
-  border:1px solid var(--border);
-  padding:10px;
-  font-size:13px;
-  text-align:center;
-  white-space: normal; /* agar teks bisa wrap */
-}
-
-th{
-  background:#eff6ff;
-  color:var(--primary-dark);
-  font-weight:700;
-  position: sticky;
-  top:0; /* tetap saat scroll vertikal */
-  z-index: 2;
-}
-
-thead th{
-  z-index: 3;
-}
-
-th.id,td.id{display:none}
-
-tr:nth-child(even){background:#fafafa}
-tr:hover{background:#eef2ff}
-
-.warning-cell{
-  color:#b91c1c;
-  font-weight:600;
-}
-
-@keyframes blink{
-  0%{background:#ffe4e4}
-  50%{background:#ffd1d1}
-  100%{background:#ffe4e4}
-}
-
-tr.bentrok{animation:blink 1.5s infinite}
-
-/* ==============================
-   FOOTER
-============================== */
-.app-footer{
-  padding:14px 20px;
-  text-align:center;
-  font-size:13px;
-  color:#64748b;
-  background:var(--card);
-  border-top:1px solid var(--border);
-}
-
-/* ==============================
-   RESPONSIVE
-============================== */
-@media (max-width:768px){
-  .topbar{grid-template-columns:1fr;text-align:center}
-  .topbar-left,.topbar-right{justify-content:center}
-  .app-title{font-size:1.15rem}
-  .logo{height:40px}
-  .form-grid{grid-template-columns:1fr}
-  button{width:100%}
-  table{min-width:720px}
-}
-@media (min-width: 1280px){
-  .main-content{
-    max-width: 100%;
-    padding-left: 32px;
-    padding-right: 32px;
-  }
-}
-
-@media (max-width:480px){
-  h1{font-size:20px}
-  table{min-width:600px}
-  th,td{font-size:11px;padding:6px}
+button:disabled {
+  background: gray;
 }
